@@ -2,4 +2,20 @@
     ViewBag.Title = "Index";
 }
 
-<h2>test 2</h2>
+<h2>Upload</h2>
+
+<p>
+    Upload your file
+</p>
+
+<form action="" method="POST" enctype="multipart/form-data">
+    <table style="margin-top: 150px">
+        <tr>
+            <td><label for="file">Filename:</label></td>
+            <td><input type="file" name="file" id="file"/></td>
+            <td><input type="submit" value="Upload"/></td>
+        </tr>
+
+
+    </table>
+</form>
