@@ -88,26 +88,56 @@ namespace United.Models
             // First create a data table, on which the bulk of our work will be done
             DataTable dt = new DataTable();
             dt.Clear();
-            dt.Columns.Add("Name");
-            dt.Columns.Add("GoalsScored");
-            dt.Columns.Add("GoalsConceded");
-            dt.Columns.Add("GoalDifference");
-            dt.Columns.Add("Points");
-            dt.Columns.Add("Position");
+            dt.Columns.Add("Name", typeof(String));             // 0
+            dt.Columns.Add("GoalsScored", typeof(int));         // 1
+            dt.Columns.Add("GoalsConceded", typeof(int));       // 2
+            dt.Columns.Add("GoalDifference", typeof(int));      // 3
+            dt.Columns.Add("Points", typeof(int));              // 4
+            dt.Columns.Add("Position", typeof(int));            // 5
 
             foreach (var fixture in fixtures)
             {
+                // "Is the home team's name anywhere in a row?" - "Is the away team's name anywhere in a row?"
                 bool containsHomeTeamName = dt.AsEnumerable().Any(row => fixture.HomeTeam == row.Field<String>("Name"));
                 bool containsAwayTeamName = dt.AsEnumerable().Any(row => fixture.AwayTeam == row.Field<String>("Name"));
 
+                // HOME team processing_________________________________________________________________________________
                 if (containsHomeTeamName)
                 {
-                    
+                    // Don't insert new row, find the existing one and increment its values
+                    var difference = fixture.FTHG - fixture.FTAG;
+                    var points = 0;
+                    var teamName = fixture.HomeTeam;
+
+                    if (fixture.FTR == "H")
+                    {
+                        points = 3;
+                    }
+                    else if (fixture.FTR == "D")
+                    {
+                        points = 1;
+                    }
+                    // Find the team's row
+                    var row = dt.AsEnumerable().Where(data => data.Field<string>("Name") == teamName);
+                    var teamRow = row.FirstOrDefault();
+                    if (row.Count() == 1)   // There must be just one row containing the team's name
+                    {
+                        teamRow["GoalsScored"] = (int)teamRow["GoalsScored"] + fixture.FTHG;
+                        teamRow["GoalsConceded"] = (int)teamRow["GoalsConceded"] + fixture.FTAG;
+                        teamRow["GoalDifference"] = (int)teamRow["GoalDifference"] + difference;
+                        teamRow["Points"] = (int)teamRow["Points"] + points;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("error, more than one row contains team's name");
+                    }
                 }
                 else
                 {
+                    // In effect, this section is only going to run once for every team, inserting its row in the table
                     var difference = fixture.FTHG - fixture.FTAG;
                     var points = 0;
+                    
                     if (fixture.FTR == "H")
                     {
                         points = 3;
@@ -120,12 +150,40 @@ namespace United.Models
                       points, 0 );
                 }
 
+                // AWAY team processing___________________________________________________________________________________
                 if (containsAwayTeamName)
                 {
-                    
+                    // Don't insert new row, find the existing one and increment its values
+                    var difference = fixture.FTAG - fixture.FTHG;
+                    var points = 0;
+                    var teamName = fixture.AwayTeam;
+
+                    if (fixture.FTR == "A")
+                    {
+                        points = 3;
+                    }
+                    else if (fixture.FTR == "D")
+                    {
+                        points = 1;
+                    }
+                    // Find the team's row
+                    var row = dt.AsEnumerable().Where(data => data.Field<string>("Name") == teamName);
+                    var teamRow = row.FirstOrDefault();
+                    if (row.Count() == 1)   // There must be just one row containing the team's name
+                    {
+                        teamRow["GoalsScored"] = (int)teamRow["GoalsScored"] + fixture.FTAG;
+                        teamRow["GoalsConceded"] = (int)teamRow["GoalsConceded"] + fixture.FTHG;
+                        teamRow["GoalDifference"] = (int)teamRow["GoalDifference"] + difference;
+                        teamRow["Points"] = (int)teamRow["Points"] + points;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("error, more than one row contains team's name");
+                    }
                 }
                 else
                 {
+                    // In effect, this section is only going to run once for every team, inserting its row in the table
                     var difference = fixture.FTAG - fixture.FTHG;
                     var points = 0;
                     if (fixture.FTR == "A")
