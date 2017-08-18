@@ -28,12 +28,20 @@ namespace United.Controllers
             // Get List of fixture Viewmodels here, directly from the CSV data
             List<FixtureVM> fixtures = FixtureVM.GetCsvData(file);
 
-
+            TempData["Fixtures"] = fixtures;
             // Process fixtures here to determine final league table of Teams
             List<Team> teams = FixtureVM.ProcessFixtures(fixtures);
 
             return View(teams);
         }
+
+        public ActionResult Details(string teamName)
+        {
+            List<FixtureVM> fixtures = (List<FixtureVM>) TempData["Fixtures"];
+            var results = FixtureVM.Find(fixtures, teamName);
+            List<TeamResult> teams = new List<TeamResult>();
+            return PartialView("_Details", teams);
+        }   
         
     }
 }

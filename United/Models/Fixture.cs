@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Web;
+using System.Web.UI;
 using CsvHelper;
 
 namespace United.Models
@@ -83,6 +84,11 @@ namespace United.Models
         public string HTR { get; set; }
         public string Referee { get; set; }
 
+        public static DataSet Find(List<FixtureVM> fixtures, string teamName)
+        {
+            return null;
+        }
+
         public static List<Team> ProcessFixtures(List<FixtureVM> fixtures)
         {
             // First create a data table, on which the bulk of our work will be done
@@ -137,7 +143,7 @@ namespace United.Models
                     // In effect, this section is only going to run once for every team, inserting its row in the table
                     var difference = fixture.FTHG - fixture.FTAG;
                     var points = 0;
-                    
+
                     if (fixture.FTR == "H")
                     {
                         points = 3;
@@ -147,7 +153,7 @@ namespace United.Models
                         points = 1;
                     }
                     dt.Rows.Add(fixture.HomeTeam, fixture.FTHG, fixture.FTAG, difference,
-                      points, 0 );
+                      points, 0);
                 }
 
                 // AWAY team processing___________________________________________________________________________________
@@ -197,6 +203,8 @@ namespace United.Models
                     dt.Rows.Add(fixture.AwayTeam, fixture.FTAG, fixture.FTHG, difference,
                         points, 0);
                 }
+
+                // Keep track of single game scores, for each team
             }
             // At this point the DataSet is correct but unordered
 
@@ -206,6 +214,14 @@ namespace United.Models
             // Go through the Teams List and order them properly
             var orderedTeamList =
                 teamList.OrderByDescending(p => p.Points).ThenBy(gd => gd.GoalDifference).ThenBy(gc => gc.GoalsScored).ToList();
+
+            // One more round, to set their final position
+            int position = 0;
+            foreach (var team in orderedTeamList)
+            {
+                position++;
+                team.LeaguePosition = position;
+            }
 
             return orderedTeamList;
         }
@@ -221,7 +237,16 @@ namespace United.Models
                     var fileName = Path.GetFileName(file.FileName);
                     var path = AppDomain.CurrentDomain.BaseDirectory + "upload\\" + fileName;
 
-                    System.IO.File.Delete(path);    // Delete old file from working directory if any, no exception thrown
+                        // Delete old file from working directory if any
+                    try
+                    {
+                        System.IO.File.Delete(path);
+                    }
+                    catch (System.IO.IOException e)
+                    {
+                        Console.WriteLine(e.Message);
+                        return null;
+                    }
                     file.SaveAs(path);
 
                     var csv = new CsvReader(new StreamReader(path));
@@ -279,7 +304,17 @@ namespace United.Models
 
             return convertedList;
         }
+
+
     }
 
-    
+    public class TeamResult
+    {
+        public DateTime GameDate { get; set; }
+        public string HomeTeam { get; set; }
+        public string AwayTeam { get; set; }
+        public string FTHG { get; set; }
+        public string FTAG { get; set; }
+    }
+
 }

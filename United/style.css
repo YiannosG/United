@@ -1,0 +1,87 @@
+﻿html {
+  font-size: 62.5%;
+}
+
+body {
+  background: #333;
+}
+
+table {
+  border: 0.3rem solid black;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background-color: #ddd;
+  box-shadow: .2rem .2rem 1rem #000;
+  margin: 0 auto;
+  white-space: nowrap;
+  font-size: 1.6rem;
+  font-family: 'Open Sans', sans-serif;
+}
+
+caption {
+  font-size: 3rem;
+  color: #ccc;
+  text-shadow: 0.1rem 0.1rem 0.3rem #000;
+  padding: 1.5rem 0 3rem;
+  font-weight: bold;
+}
+
+tbody {
+  text-align: center;
+  border-bottom: 0.3rem solid black;
+  border-top: 0.3rem solid black;
+}
+
+tfoot th, tfoot td {
+  font-size: 1.4rem;
+  padding: 0 1rem;
+  line-height: 2;
+}
+
+th, td {
+  padding: 1rem;
+  border-bottom: 0.1rem solid black;
+  border-top: 0.1rem solid black;
+  overflow: hidden;
+}
+
+tbody tr th {
+  text-align: left;
+}
+
+tbody> :nth-child(1), tbody> :nth-child(2), tbody> :nth-child(3) {
+  background-color: #5F7EC6;
+}
+
+tbody> :nth-child(4) {
+  background-color: #85A0DD;
+}
+
+tbody> :nth-child(5), tbody> :nth-child(6) {
+  background-color: #B6C7F0;
+}
+
+tbody> :nth-child(2n+6) {
+  background-color: #ddd;
+}
+
+tbody> :nth-child(2n+7) {
+  background-color: #ccc;
+}
+
+thead, tfoot tr :last-child {
+  background: linear-gradient(to bottom, #111, #333 50%, #111);
+  color: #ddd;
+}
+
+tfoot>tr:nth-child(1) :first-child {
+  background-color: #5F7EC6;
+}
+
+tfoot>tr:nth-child(2) :first-child {
+  background-color: #85A0DD;
+}
+
+tfoot>tr:nth-child(3) :first-child {
+  background-color: #B6C7F0;
+}

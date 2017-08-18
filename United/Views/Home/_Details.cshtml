@@ -1,0 +1,20 @@
+﻿@using United.Models
+@model List<TeamResult>
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h4 class="modal-title" id="myModalLabel">Team Results</h4>
+
+    <hr/>
+    @if (Model != null)
+    {
+        foreach (var result in Model)
+        {
+            <dl class="dl-horizontal">
+                <dt>
+                    @result.HomeTeam
+                </dt>
+            </dl>
+        }
+    }
+</div>
