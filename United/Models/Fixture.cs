@@ -198,8 +198,16 @@ namespace United.Models
                         points, 0);
                 }
             }
+            // At this point the DataSet is correct but unordered
 
-            return null;
+            // Turn DataSet to List of Teams
+            var teamList = ConvertDataTableToList(dt);
+
+            // Go through the Teams List and order them properly
+            var orderedTeamList =
+                teamList.OrderByDescending(p => p.Points).ThenBy(gd => gd.GoalDifference).ThenBy(gc => gc.GoalsScored).ToList();
+
+            return orderedTeamList;
         }
 
         public static List<FixtureVM> GetCsvData(HttpPostedFileBase file)
@@ -254,7 +262,23 @@ namespace United.Models
             }
 
             return fixtures;
-        } 
+        }
+
+        private static List<Team> ConvertDataTableToList(DataTable dt)
+        {
+            var convertedList = (from row in dt.AsEnumerable()
+                                 select new Team()
+                                 {
+                                     LeaguePosition = Convert.ToInt32(row["Position"]),
+                                     TeamName = Convert.ToString(row["Name"]),
+                                     GoalsScored = Convert.ToInt32(row["GoalsScored"]),
+                                     GoalsConceded = Convert.ToInt32(row["GoalsConceded"]),
+                                     GoalDifference = Convert.ToInt32(row["GoalDifference"]),
+                                     Points = Convert.ToInt32(row["Points"])
+                                 }).ToList();
+
+            return convertedList;
+        }
     }
 
     
