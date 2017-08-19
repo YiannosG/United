@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Web;
 using System.Web.Mvc;
 using United.Models;
@@ -25,22 +26,37 @@ namespace United.Controllers
         [HttpPost]
         public ActionResult Index(HttpPostedFileBase file)
         {
-            // Get List of fixture Viewmodels here, directly from the CSV data
-            List<FixtureVM> fixtures = FixtureVM.GetCsvData(file);
+            var ext = Path.GetExtension(file.FileName);
+            if (ext == ".csv")
+            {
+                // Get List of fixture Viewmodels here, directly from the CSV data
+                List<FixtureVM> fixtures = FixtureVM.GetCsvData(file);
+                Session.Add("Fixtures", fixtures);
 
-            TempData["Fixtures"] = fixtures;
-            // Process fixtures here to determine final league table of Teams
-            List<Team> teams = FixtureVM.ProcessFixtures(fixtures);
+                // Process fixtures here to determine final league table of Teams
+                List<Team> teams = FixtureVM.ProcessFixtures(fixtures);
+                var teamsViewModel = new TeamsViewModel();
 
-            return View(teams);
+                teamsViewModel.Teams = teams;
+                teamsViewModel.TeamDetails = TeamResult.ProcessTeamFixtures(fixtures);
+
+                return View(teamsViewModel);
+            }
+            else
+            {
+                ViewBag.Message = "You can only upload .csv files!";
+                return View();
+            }
         }
 
         public ActionResult Details(string teamName)
         {
-            List<FixtureVM> fixtures = (List<FixtureVM>) TempData["Fixtures"];
-            var results = FixtureVM.Find(fixtures, teamName);
-            List<TeamResult> teams = new List<TeamResult>();
-            return PartialView("_Details", teams);
+            List<TeamResult> allDetails = new List<TeamResult>();
+            allDetails = TeamResult.ProcessTeamFixtures((List<FixtureVM>)Session["Fixtures"]);
+
+            var teamDetails = FixtureVM.Find(allDetails, teamName);
+            ViewBag.TeamName = teamName;
+            return PartialView("_Details", teamDetails);
         }   
         
     }

@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 using System.Web.UI;
 using CsvHelper;
 
@@ -84,9 +85,12 @@ namespace United.Models
         public string HTR { get; set; }
         public string Referee { get; set; }
 
-        public static DataSet Find(List<FixtureVM> fixtures, string teamName)
+        public static List<TeamResult> Find(List<TeamResult> fixtures, string teamName)
         {
-            return null;
+            // Find all fixtures where the team name matches either the home or away team's name
+            var teamResults =
+                fixtures.Where(name => (name.HomeTeam == teamName || name.AwayTeam == teamName)).ToList();
+            return teamResults;
         }
 
         public static List<Team> ProcessFixtures(List<FixtureVM> fixtures)
@@ -236,49 +240,55 @@ namespace United.Models
                 {
                     var fileName = Path.GetFileName(file.FileName);
                     var path = AppDomain.CurrentDomain.BaseDirectory + "upload\\" + fileName;
-
+                    
                         // Delete old file from working directory if any
-                    try
-                    {
-                        System.IO.File.Delete(path);
-                    }
-                    catch (System.IO.IOException e)
-                    {
-                        Console.WriteLine(e.Message);
-                        return null;
-                    }
-                    file.SaveAs(path);
-
-                    var csv = new CsvReader(new StreamReader(path));
-                    var csvFixtures = csv.GetRecords<Fixture>();
-
-                    foreach (var csvFixture in csvFixtures)
-                    {
-                        FixtureVM fixtureViewmodel = new FixtureVM();
-
-                        fixtureViewmodel.Div = csvFixture.Div;
-                        // Date parsing might fail if format is diffent than what we expect so put it in a try block
                         try
                         {
-                            fixtureViewmodel.Date = DateTime.Parse(csvFixture.Date);
+                            System.IO.File.Delete(path);
                         }
-                        catch (Exception e)
+                        catch (System.IO.IOException e)
                         {
                             Console.WriteLine(e.Message);
+                            return null;
                         }
 
-                        fixtureViewmodel.HomeTeam = csvFixture.HomeTeam;
-                        fixtureViewmodel.AwayTeam = csvFixture.AwayTeam;
-                        fixtureViewmodel.FTHG = int.Parse(csvFixture.FTHG);
-                        fixtureViewmodel.FTAG = int.Parse(csvFixture.FTAG);
-                        fixtureViewmodel.FTR = csvFixture.FTR;
-                        fixtureViewmodel.HTHG = int.Parse(csvFixture.HTHG);
-                        fixtureViewmodel.HTAG = int.Parse(csvFixture.HTAG);
-                        fixtureViewmodel.HTR = csvFixture.HTR;
-                        fixtureViewmodel.Referee = csvFixture.Referee;
+                        file.SaveAs(path);
 
-                        fixtures.Add(fixtureViewmodel);
-                    }
+                        using (var csv = new CsvReader(new StreamReader(path)))
+                        {
+
+                            var csvFixtures = csv.GetRecords<Fixture>();
+
+                            foreach (var csvFixture in csvFixtures)
+                            {
+                                FixtureVM fixtureViewmodel = new FixtureVM();
+
+                                fixtureViewmodel.Div = csvFixture.Div;
+                                // Date parsing might fail if format is diffent than what we expect so put it in a try block
+                                try
+                                {
+                                    fixtureViewmodel.Date = DateTime.Parse(csvFixture.Date);
+                                }
+                                catch (Exception e)
+                                {
+                                    Console.WriteLine(e.Message);
+                                }
+
+                                fixtureViewmodel.HomeTeam = csvFixture.HomeTeam;
+                                fixtureViewmodel.AwayTeam = csvFixture.AwayTeam;
+                                fixtureViewmodel.FTHG = int.Parse(csvFixture.FTHG);
+                                fixtureViewmodel.FTAG = int.Parse(csvFixture.FTAG);
+                                fixtureViewmodel.FTR = csvFixture.FTR;
+                                fixtureViewmodel.HTHG = int.Parse(csvFixture.HTHG);
+                                fixtureViewmodel.HTAG = int.Parse(csvFixture.HTAG);
+                                fixtureViewmodel.HTR = csvFixture.HTR;
+                                fixtureViewmodel.Referee = csvFixture.Referee;
+
+                                fixtures.Add(fixtureViewmodel);
+                            }
+                        }
+                    
+                   
                 }
             }
             catch (Exception e)
@@ -306,15 +316,6 @@ namespace United.Models
         }
 
 
-    }
-
-    public class TeamResult
-    {
-        public DateTime GameDate { get; set; }
-        public string HomeTeam { get; set; }
-        public string AwayTeam { get; set; }
-        public string FTHG { get; set; }
-        public string FTAG { get; set; }
     }
 
 }
