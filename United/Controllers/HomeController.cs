@@ -38,7 +38,7 @@ namespace United.Controllers
                 var teamsViewModel = new TeamsViewModel();
 
                 teamsViewModel.Teams = teams;
-                teamsViewModel.TeamDetails = TeamResult.ProcessTeamFixtures(fixtures);
+                teamsViewModel.AllTeamsDetails = TeamResult.ProcessTeamFixtures(fixtures);
 
                 return View(teamsViewModel);
             }
@@ -49,6 +49,11 @@ namespace United.Controllers
             }
         }
 
+        /// <summary>
+        /// Controller action for the partial view of Team Details (modal)
+        /// </summary>
+        /// <param name="teamName">The name of the team</param>
+        /// <returns>Details for the given team</returns>
         public ActionResult Details(string teamName)
         {
             List<TeamResult> allDetails = new List<TeamResult>();

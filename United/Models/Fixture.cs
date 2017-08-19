@@ -11,7 +11,8 @@ using CsvHelper;
 namespace United.Models
 {
     /// <summary>
-    /// Model representing a fixture.
+    /// Model representing a fixture. It will be the first entity to receive
+    /// the parsed CSV data
     /// </summary>
     public class Fixture
     {
@@ -33,7 +34,7 @@ namespace United.Models
         /// <summary>
         /// Away Team
         /// </summary>
-        public String AwayTeam { get; set; }
+        public string AwayTeam { get; set; }
 
         /// <summary>
         /// Full-time Home Goals
@@ -71,6 +72,9 @@ namespace United.Models
         public string Referee { get; set; }
     }
 
+    /// <summary>
+    /// Model for the fixtures to be viewed in the main table view
+    /// </summary>
     public class FixtureVM
     {
         public string Div { get; set; }
@@ -85,6 +89,12 @@ namespace United.Models
         public string HTR { get; set; }
         public string Referee { get; set; }
 
+        /// <summary>
+        /// Finds all the games that pertain to a single team
+        /// </summary>
+        /// <param name="fixtures">All the fixtures</param>
+        /// <param name="teamName">The name of the team for which game results need to be produced</param>
+        /// <returns></returns>
         public static List<TeamResult> Find(List<TeamResult> fixtures, string teamName)
         {
             // Find all fixtures where the team name matches either the home or away team's name
@@ -93,6 +103,12 @@ namespace United.Models
             return teamResults;
         }
 
+        /// <summary>
+        /// The main logic of the app. Takes the fixtures from the file, and calculates the final league
+        /// table.
+        /// </summary>
+        /// <param name="fixtures">The fixtures, after having been mapped from the file</param>
+        /// <returns>The final, processed and ordered list of the league table teams</returns>
         public static List<Team> ProcessFixtures(List<FixtureVM> fixtures)
         {
             // First create a data table, on which the bulk of our work will be done
@@ -230,6 +246,11 @@ namespace United.Models
             return orderedTeamList;
         }
 
+        /// <summary>
+        /// Gets the CSV data from the uploaded file. Uses CSVHelper library.
+        /// </summary>
+        /// <param name="file">The wrapper that contains the file information</param>
+        /// <returns>A list of fixtures, mapped to the appropriate VM</returns>
         public static List<FixtureVM> GetCsvData(HttpPostedFileBase file)
         {
             List<FixtureVM> fixtures = new List<FixtureVM>();
@@ -287,8 +308,6 @@ namespace United.Models
                                 fixtures.Add(fixtureViewmodel);
                             }
                         }
-                    
-                   
                 }
             }
             catch (Exception e)
@@ -299,6 +318,11 @@ namespace United.Models
             return fixtures;
         }
 
+        /// <summary>
+        /// Like it says on the tin
+        /// </summary>
+        /// <param name="dt">The dataset with the processed data</param>
+        /// <returns>A list of the resulted data</returns>
         private static List<Team> ConvertDataTableToList(DataTable dt)
         {
             var convertedList = (from row in dt.AsEnumerable()
@@ -314,8 +338,5 @@ namespace United.Models
 
             return convertedList;
         }
-
-
     }
-
 }
