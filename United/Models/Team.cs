@@ -9,6 +9,7 @@ namespace United.Models
     public class Team
     {
         public int LeaguePosition { get; set; }
+        public string Image { get; set; }   // Lacking a db this is just a foldername of local file
         public string TeamName { get; set; }
         public int GoalsScored { get; set; }
         public int GoalsConceded { get; set; }

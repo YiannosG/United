@@ -233,7 +233,11 @@ namespace United.Models
 
             // Go through the Teams List and order them properly
             var orderedTeamList =
-                teamList.OrderByDescending(p => p.Points).ThenBy(gd => gd.GoalDifference).ThenBy(gc => gc.GoalsScored).ToList();
+                teamList
+                .OrderByDescending(p => p.Points)
+                .ThenByDescending(gd => gd.GoalDifference)
+                .ThenByDescending(gc => gc.GoalsScored)
+                .ToList();
 
             // One more round, to set their final position
             int position = 0;
@@ -330,6 +334,7 @@ namespace United.Models
                                  {
                                      LeaguePosition = Convert.ToInt32(row["Position"]),
                                      TeamName = Convert.ToString(row["Name"]),
+                                     Image = "~/Images/" + Convert.ToString(row["Name"]) +".png",   // Use teamname to derive logo name
                                      GoalsScored = Convert.ToInt32(row["GoalsScored"]),
                                      GoalsConceded = Convert.ToInt32(row["GoalsConceded"]),
                                      GoalDifference = Convert.ToInt32(row["GoalDifference"]),
