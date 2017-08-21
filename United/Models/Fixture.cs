@@ -4,13 +4,15 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 using System.Web.UI;
 using CsvHelper;
 
 namespace United.Models
 {
     /// <summary>
-    /// Model representing a fixture.
+    /// Model representing a fixture. It will be the first entity to receive
+    /// the parsed CSV data
     /// </summary>
     public class Fixture
     {
@@ -32,7 +34,7 @@ namespace United.Models
         /// <summary>
         /// Away Team
         /// </summary>
-        public String AwayTeam { get; set; }
+        public string AwayTeam { get; set; }
 
         /// <summary>
         /// Full-time Home Goals
@@ -70,6 +72,9 @@ namespace United.Models
         public string Referee { get; set; }
     }
 
+    /// <summary>
+    /// Model for the fixtures to be viewed in the main table view
+    /// </summary>
     public class FixtureVM
     {
         public string Div { get; set; }
@@ -84,11 +89,26 @@ namespace United.Models
         public string HTR { get; set; }
         public string Referee { get; set; }
 
-        public static DataSet Find(List<FixtureVM> fixtures, string teamName)
+        /// <summary>
+        /// Finds all the games that pertain to a single team
+        /// </summary>
+        /// <param name="fixtures">All the fixtures</param>
+        /// <param name="teamName">The name of the team for which game results need to be produced</param>
+        /// <returns></returns>
+        public static List<TeamResult> Find(List<TeamResult> fixtures, string teamName)
         {
-            return null;
+            // Find all fixtures where the team name matches either the home or away team's name
+            var teamResults =
+                fixtures.Where(name => (name.HomeTeam == teamName || name.AwayTeam == teamName)).ToList();
+            return teamResults;
         }
 
+        /// <summary>
+        /// The main logic of the app. Takes the fixtures from the file, and calculates the final league
+        /// table.
+        /// </summary>
+        /// <param name="fixtures">The fixtures, after having been mapped from the file</param>
+        /// <returns>The final, processed and ordered list of the league table teams</returns>
         public static List<Team> ProcessFixtures(List<FixtureVM> fixtures)
         {
             // First create a data table, on which the bulk of our work will be done
@@ -213,7 +233,11 @@ namespace United.Models
 
             // Go through the Teams List and order them properly
             var orderedTeamList =
-                teamList.OrderByDescending(p => p.Points).ThenBy(gd => gd.GoalDifference).ThenBy(gc => gc.GoalsScored).ToList();
+                teamList
+                .OrderByDescending(p => p.Points)
+                .ThenByDescending(gd => gd.GoalDifference)
+                .ThenByDescending(gc => gc.GoalsScored)
+                .ToList();
 
             // One more round, to set their final position
             int position = 0;
@@ -226,6 +250,11 @@ namespace United.Models
             return orderedTeamList;
         }
 
+        /// <summary>
+        /// Gets the CSV data from the uploaded file. Uses CSVHelper library.
+        /// </summary>
+        /// <param name="file">The wrapper that contains the file information</param>
+        /// <returns>A list of fixtures, mapped to the appropriate VM</returns>
         public static List<FixtureVM> GetCsvData(HttpPostedFileBase file)
         {
             List<FixtureVM> fixtures = new List<FixtureVM>();
@@ -236,49 +265,53 @@ namespace United.Models
                 {
                     var fileName = Path.GetFileName(file.FileName);
                     var path = AppDomain.CurrentDomain.BaseDirectory + "upload\\" + fileName;
-
+                    
                         // Delete old file from working directory if any
-                    try
-                    {
-                        System.IO.File.Delete(path);
-                    }
-                    catch (System.IO.IOException e)
-                    {
-                        Console.WriteLine(e.Message);
-                        return null;
-                    }
-                    file.SaveAs(path);
-
-                    var csv = new CsvReader(new StreamReader(path));
-                    var csvFixtures = csv.GetRecords<Fixture>();
-
-                    foreach (var csvFixture in csvFixtures)
-                    {
-                        FixtureVM fixtureViewmodel = new FixtureVM();
-
-                        fixtureViewmodel.Div = csvFixture.Div;
-                        // Date parsing might fail if format is diffent than what we expect so put it in a try block
                         try
                         {
-                            fixtureViewmodel.Date = DateTime.Parse(csvFixture.Date);
+                            System.IO.File.Delete(path);
                         }
-                        catch (Exception e)
+                        catch (System.IO.IOException e)
                         {
                             Console.WriteLine(e.Message);
+                            return null;
                         }
 
-                        fixtureViewmodel.HomeTeam = csvFixture.HomeTeam;
-                        fixtureViewmodel.AwayTeam = csvFixture.AwayTeam;
-                        fixtureViewmodel.FTHG = int.Parse(csvFixture.FTHG);
-                        fixtureViewmodel.FTAG = int.Parse(csvFixture.FTAG);
-                        fixtureViewmodel.FTR = csvFixture.FTR;
-                        fixtureViewmodel.HTHG = int.Parse(csvFixture.HTHG);
-                        fixtureViewmodel.HTAG = int.Parse(csvFixture.HTAG);
-                        fixtureViewmodel.HTR = csvFixture.HTR;
-                        fixtureViewmodel.Referee = csvFixture.Referee;
+                        file.SaveAs(path);
 
-                        fixtures.Add(fixtureViewmodel);
-                    }
+                        using (var csv = new CsvReader(new StreamReader(path)))
+                        {
+
+                            var csvFixtures = csv.GetRecords<Fixture>();
+
+                            foreach (var csvFixture in csvFixtures)
+                            {
+                                FixtureVM fixtureViewmodel = new FixtureVM();
+
+                                fixtureViewmodel.Div = csvFixture.Div;
+                                // Date parsing might fail if format is diffent than what we expect so put it in a try block
+                                try
+                                {
+                                    fixtureViewmodel.Date = DateTime.Parse(csvFixture.Date);
+                                }
+                                catch (Exception e)
+                                {
+                                    Console.WriteLine(e.Message);
+                                }
+
+                                fixtureViewmodel.HomeTeam = csvFixture.HomeTeam;
+                                fixtureViewmodel.AwayTeam = csvFixture.AwayTeam;
+                                fixtureViewmodel.FTHG = int.Parse(csvFixture.FTHG);
+                                fixtureViewmodel.FTAG = int.Parse(csvFixture.FTAG);
+                                fixtureViewmodel.FTR = csvFixture.FTR;
+                                fixtureViewmodel.HTHG = int.Parse(csvFixture.HTHG);
+                                fixtureViewmodel.HTAG = int.Parse(csvFixture.HTAG);
+                                fixtureViewmodel.HTR = csvFixture.HTR;
+                                fixtureViewmodel.Referee = csvFixture.Referee;
+
+                                fixtures.Add(fixtureViewmodel);
+                            }
+                        }
                 }
             }
             catch (Exception e)
@@ -289,6 +322,11 @@ namespace United.Models
             return fixtures;
         }
 
+        /// <summary>
+        /// Like it says on the tin
+        /// </summary>
+        /// <param name="dt">The dataset with the processed data</param>
+        /// <returns>A list of the resulted data</returns>
         private static List<Team> ConvertDataTableToList(DataTable dt)
         {
             var convertedList = (from row in dt.AsEnumerable()
@@ -296,6 +334,7 @@ namespace United.Models
                                  {
                                      LeaguePosition = Convert.ToInt32(row["Position"]),
                                      TeamName = Convert.ToString(row["Name"]),
+                                     Image = "~/Images/" + Convert.ToString(row["Name"]) +".png",   // Use teamname to derive logo name
                                      GoalsScored = Convert.ToInt32(row["GoalsScored"]),
                                      GoalsConceded = Convert.ToInt32(row["GoalsConceded"]),
                                      GoalDifference = Convert.ToInt32(row["GoalDifference"]),
@@ -304,17 +343,5 @@ namespace United.Models
 
             return convertedList;
         }
-
-
     }
-
-    public class TeamResult
-    {
-        public DateTime GameDate { get; set; }
-        public string HomeTeam { get; set; }
-        public string AwayTeam { get; set; }
-        public string FTHG { get; set; }
-        public string FTAG { get; set; }
-    }
-
 }

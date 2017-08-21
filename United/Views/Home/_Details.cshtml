@@ -3,18 +3,31 @@
 
 <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h4 class="modal-title" id="myModalLabel">Team Results</h4>
-
-    <hr/>
-    @if (Model != null)
-    {
-        foreach (var result in Model)
-        {
-            <dl class="dl-horizontal">
-                <dt>
-                    @result.HomeTeam
-                </dt>
-            </dl>
-        }
-    }
+    <h4 class="modal-title" id="myModalLabel">Team Results for @ViewBag.TeamName</h4>
+    
+        <hr />
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col" style="text-align: center;">Home</th>
+                <th scope="col">Score</th>
+                <th scope="col" style="text-align: center;">Away</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null)
+            {
+                foreach (var teamResult in Model)
+                {
+                    <tr>
+                        <td>@teamResult.GameDate.ToShortDateString()</td>
+                        <td>@teamResult.HomeTeam</td>
+                        <td>@teamResult.FTHG - @teamResult.FTAG</td>
+                        <td>@teamResult.AwayTeam</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
 </div>

@@ -6,6 +6,10 @@ body {
   background: #333;
 }
 
+body.modal-open {
+    overflow: visible;
+}
+
 table {
   border: 0.3rem solid black;
   border-collapse: collapse;
@@ -49,23 +53,23 @@ tbody tr th {
   text-align: left;
 }
 
-tbody> :nth-child(1), tbody> :nth-child(2), tbody> :nth-child(3) {
+tbody.leagueBody> :nth-child(1), tbody.leagueBody> :nth-child(2), tbody.leagueBody> :nth-child(3) {
   background-color: #5F7EC6;
 }
 
-tbody> :nth-child(4) {
+tbody.leagueBody> :nth-child(4) {
   background-color: #85A0DD;
 }
 
-tbody> :nth-child(5), tbody> :nth-child(6) {
+tbody.leagueBody> :nth-child(5), tbody.leagueBody> :nth-child(6) {
   background-color: #B6C7F0;
 }
 
-tbody> :nth-child(2n+6) {
+tbody.leagueBody> :nth-child(2n+6) {
   background-color: #ddd;
 }
 
-tbody> :nth-child(2n+7) {
+tbody.leagueBody> :nth-child(2n+7) {
   background-color: #ccc;
 }
 

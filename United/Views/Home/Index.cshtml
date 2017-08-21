@@ -3,121 +3,141 @@
 }
 
 @using United.Models
-@model List<Team>
-<link rel="stylesheet" href="~/style.css" title="external style sheet">
+@model TeamsViewModel
 
-<h2>Upload</h2>
+<head>
+    <title>League Table</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-<p>
-    Upload your file
-</p>
-
-<form action="" method="POST" enctype="multipart/form-data">
-    <table style="margin-top: 150px">
-        <tr>
-            <td>
-                <label for="file">Filename:</label></td>
-            <td>
-                <input type="file" name="file" id="file"/></td>
-            <td>
-                <input type="submit" value="Upload"/></td>
-        </tr>
+    <link rel="stylesheet" href="~/style.css" title="external style sheet">
+</head>
 
 
-    </table>
 
-    <table>
-        <caption>Premier League 2015 - 2016</caption>
-        <thead>
-        <tr>
-            <th scope="col">Position</th>
-            <th scope="col">Team</th>
-            <th scope="col">Goal Difference</th>
-            <th scope="col">Goals Scored</th>
-            <th scope="col">Points</th>
-        </tr>
-        </thead>
-        <tbody>
-        @if (Model != null)
-        {
-            foreach (var team in Model)
+<div class="container">
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-warning">
+            <strong>Sorry!</strong> @ViewBag.Message
+        </div>
+    }
+    <h2>Upload</h2>
+
+    <p>
+        Upload your file
+    </p>
+
+    <form action="" method="POST" enctype="multipart/form-data">
+        <table style="margin-top: 150px">
+            <tr>
+                <td>
+                    <label for="file">Filename:</label>
+                </td>
+                <td>
+                    <input type="file" name="file" accept=".csv" id="file"/>
+                </td>
+                <td>
+                    <input type="submit" value="Upload"/>
+                </td>
+            </tr>
+
+
+        </table>
+
+        <table>
+            <caption>Premier League 2015 - 2016</caption>
+            <thead>
+            <tr>
+                <th scope="col">Position</th>
+                <th scope="col">Team</th>
+                <th scope="col">Goal Difference</th>
+                <th scope="col">Goals Scored</th>
+                <th scope="col">Points</th>
+            </tr>
+            </thead>
+            <tbody class="leagueBody">
+            @if (Model != null)
             {
-                <tr>
-                    <td>@team.LeaguePosition</td>
-                    <th scope="row"><a href="javascript:void(0);" class="anchorDetail" data-id="@team.TeamName">@team.TeamName</a></th>
-                    <td>@team.GoalDifference</td>
-                    <td>@team.GoalsScored</td>
-                    <td>@team.Points</td>
-                </tr>
+                foreach (var team in Model.Teams)
+                {
+                    <tr>
+                        <td>@team.LeaguePosition</td>
+                        <th scope="row">
+                            <img alt="List View" src="@Url.Content(team.Image)">
+                            <a href="javascript:void(0);" style="color: black !important" class="anchorDetail" data-toggle="modal"
+                               data-target="#myModal" data-id="@team.TeamName">@team.TeamName</a>
+                        </th>
+                        <td>@team.GoalDifference</td>
+                        <td>@team.GoalsScored</td>
+                        <td>@team.Points</td>
+                    </tr>
+                }
             }
-        }
-        </tbody>
-        <tfoot>
-        <tr>
-            <td></td>
-            <td colspan="4">Champions League</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td colspan="4">Champions League Qualifikation</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td colspan="4">Europa League</td>
-        </tr>
-        </tfoot>
-    </table>
-</form>
+            </tbody>
+            <tfoot>
+            <tr>
+                <td></td>
+                <td colspan="4">Champions League</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="4">Champions League Qualification</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="4">Europa League</td>
+            </tr>
+            </tfoot>
+        </table>
+    </form>
+</div>
 
-<div id='myModal' class='modal'>  
-    <div class="modal-dialog">  
-        <div class="modal-content">  
-            <div id='myModalContent'></div>  
-        </div>  
+<div id='myModal' class='modal fade'>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div id='myModalContent'></div>
+        </div>
     </div>
+</div>
 
-</div>  
 
-    @section scripts  
-    {  
-        <script src="~/Scripts/jquery-3.1.1.min.js"></script>  
-        <script src="~/Scripts/bootstrap.js"></script>  
-        <script src="~/Scripts/bootstrap.min.js"></script>  
-    <script>  
-        var TeamDetailPostBackURL = '/Home/Details';  
-        $(function () {  
-            $(".anchorDetail").click(function () {  
-                debugger;  
-                var $buttonClicked = $(this);  
-                var teamName = $buttonClicked.attr('data-id');  
-                var options = { "backdrop": "static", keyboard: true };  
-                $.ajax({  
-                    type: "GET",  
-                    url: TeamDetailPostBackURL,  
-                    contentType: "application/json; charset=utf-8",  
-                    data: { "TeamName": teamName },  
-                    datatype: "json",  
-                    success: function (data) {  
-                        debugger;  
-                        $('#myModalContent').html(data);  
-                        $('#myModal').modal(options);  
-                        $('#myModal').modal('show');                    
-      
-                    },  
-                    error: function () {  
-                        alert("Dynamic content load failed.");  
-                    }  
-                });  
-            });  
-            //$("#closebtn").on('click',function(){  
-            //    $('#myModal').modal('hide');    
-      
-            $("#closbtn").click(function () {  
-                $('#myModal').modal('hide');  
-            });        
-        });  
-         
-    </script>  
-      
-    }  
+
+<script>
+    var TeamDetailPostBackURL = '/Home/Details';
+    $(function () {
+        $(".anchorDetail").click(function () {
+            var $buttonClicked = $(this);
+            var teamName = $buttonClicked.attr('data-id');
+            var options = { "backdrop": "static", keyboard: true };
+            $.ajax({
+                type: "GET",
+                url: TeamDetailPostBackURL,
+                contentType: "application/json; charset=utf-8",
+                data: { "teamName": teamName },
+                datatype: "json",
+                success: function (data) {
+
+                    $('#myModalContent').html(data);
+                    $('#myModal').modal(options);
+                    $('#myModal').modal('show');
+
+                },
+                error: function () {
+                    alert("Dynamic content load failed.");
+                }
+            });
+        });
+
+        $("#closbtn").click(function () {
+            $('#myModal').modal('hide');
+        });
+    });
+
+</script>
+
+
 
